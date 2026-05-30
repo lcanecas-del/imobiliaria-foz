@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function SearchForm() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     tipo: "",
     tipologia: "",
@@ -21,6 +22,7 @@ export default function SearchForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLoading(true);
     const params = new URLSearchParams();
     Object.entries(form).forEach(([key, value]) => {
       if (value) params.set(key, value);
@@ -145,9 +147,10 @@ export default function SearchForm() {
 
       <button
         type="submit"
-        className="w-full rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+        disabled={loading}
+        className="w-full rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        Pesquisar imóveis
+        {loading ? "A carregar resultados..." : "Pesquisar imóveis"}
       </button>
     </form>
   );
