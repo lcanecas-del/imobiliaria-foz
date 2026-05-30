@@ -1,8 +1,8 @@
 export const dynamic = "force-dynamic";
 
+import { fetchRemax, fetchZome, filtrar } from "@/lib/fetchers";
 import ImovelCard from "@/components/ImovelCard";
 import Link from "next/link";
-import type { Imovel } from "@/lib/supabase";
 
 interface SearchParams {
   tipo?: string;
@@ -12,19 +12,7 @@ interface SearchParams {
   areaMax?: string;
   precoMin?: string;
   precoMax?: string;
-}
-
-async function getImoveis(params: SearchParams, baseUrl: string): Promise<Imovel[]> {
-  const qs = new URLSearchParams(
-    Object.entries(params).filter(([, v]) => Boolean(v)) as [string, string][]
-  ).toString();
-
-  const res = await fetch(`${baseUrl}/api/imoveis${qs ? "?" + qs : ""}`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) return [];
-  return res.json();
+  [key: string]: string | undefined;
 }
 
 export default async function ResultadosPage({
@@ -34,12 +22,8 @@ export default async function ResultadosPage({
 }) {
   const params = await searchParams;
 
-  const baseUrl =
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
-
-  const imoveis = await getImoveis(params, baseUrl);
+  const [remax, zome] = await Promise.all([fetchRemax(), fetchZome()]);
+  const imoveis = filtrar([...remax, ...zome], params);
   const temFiltros = Object.values(params).some(Boolean);
 
   return (
