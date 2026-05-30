@@ -1,5 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Debug files
+debug_*.json
+lib/scrapers/debug*.ts
+
 # dependencies
 /node_modules
 /.pnp
