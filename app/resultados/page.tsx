@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import ImovelCard from "@/components/ImovelCard";
 import Link from "next/link";
 import type { Imovel } from "@/lib/supabase";
@@ -16,6 +16,7 @@ interface SearchParams {
 }
 
 async function getImoveis(params: SearchParams): Promise<Imovel[]> {
+  const supabase = getSupabase();
   let query = supabase
     .from("imoveis")
     .select("*")

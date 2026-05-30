@@ -4,7 +4,8 @@ dotenv.config({ path: ".env.local" });
 import type { Imovel } from "../supabase";
 
 async function guardarImoveis(imoveis: Imovel[], fonte: string) {
-  const { supabase } = await import("../supabase");
+  const { getSupabase } = await import("../supabase");
+  const supabase = getSupabase();
 
   if (imoveis.length === 0) {
     console.log(`${fonte}: nenhum imóvel para guardar`);
