@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { supabase } from "@/lib/supabase";
 import ImovelCard from "@/components/ImovelCard";
 import Link from "next/link";
