@@ -194,12 +194,17 @@ function extrairBlocosListagem(html: string): string {
 // ── Helper: extrair imóveis de HTML via Claude ──────────────────────────────
 async function extrairDeHTML(url: string, baseUrl: string, fonte: string, contacto: string): Promise<Imovel[]> {
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+
     const res = await fetch(url, {
+      signal: controller.signal,
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         Accept: "text/html,application/xhtml+xml",
       },
     });
+    clearTimeout(timeout);
     if (!res.ok) return [];
     const html = await res.text();
     const conteudo = extrairBlocosListagem(html);
