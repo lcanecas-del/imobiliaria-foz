@@ -1,3 +1,4 @@
+import Anthropic from "@anthropic-ai/sdk";
 import type { Imovel } from "./supabase";
 
 function slugify(str: string): string {
@@ -209,7 +210,6 @@ async function extrairDeHTML(url: string, baseUrl: string, fonte: string, contac
     const html = await res.text();
     const conteudo = extrairBlocosListagem(html);
 
-    const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const response = await client.messages.create({
@@ -258,7 +258,8 @@ ${conteudo}`,
       foto: (item.foto as string) || null,
     }));
   } catch (err) {
-    console.error(`${fonte}: erro —`, err);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`${fonte}: erro — ${msg}`);
     return [];
   }
 }
