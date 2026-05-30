@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { getSupabase } from "./supabase";
 import type { Imovel } from "./supabase";
 
 function slugify(str: string): string {
@@ -307,7 +308,6 @@ export async function fetchImoexpansao(): Promise<Imovel[]> {
 // ── Supabase cache (para agências com HTML — lidas da BD na Vercel) ─────────
 export async function fetchFromSupabase(fontes: string[]): Promise<Imovel[]> {
   try {
-    const { getSupabase } = await import("./supabase");
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from("imoveis")
