@@ -44,6 +44,14 @@ async function main() {
     fetchImoexpansao,
   } = await import("../fetchers");
 
+  const {
+    scrapeHomelusa,
+    scrapeRealfoz,
+    scrapeImogabinete,
+  } = await import("./egorealestate");
+
+  const { scrapeHimobiliaria } = await import("./himobiliaria");
+
   console.log("\n[Fase 1 — APIs directas]");
   const [imoveisRemax, imoveisZome] = await Promise.all([
     scrapeRemax(),
@@ -55,6 +63,10 @@ async function main() {
   const imoveisEspacos = await fetchEspacosECasas();
   const imoveisRenthouse = await fetchRenthouse();
   const imoveisImoexpansao = await fetchImoexpansao();
+  const imoveisHimobiliaria = await scrapeHimobiliaria();
+  const imoveisHomelusa = await scrapeHomelusa();
+  const imoveisRealfoz = await scrapeRealfoz();
+  const imoveisImogabinete = await scrapeImogabinete();
 
   console.log("\n[A guardar no Supabase...]");
   await guardarImoveis(imoveisRemax, "Remax");
@@ -63,6 +75,10 @@ async function main() {
   await guardarImoveis(imoveisEspacos, "Espaços e Casas");
   await guardarImoveis(imoveisRenthouse, "Renthouse");
   await guardarImoveis(imoveisImoexpansao, "Imoexpansão");
+  await guardarImoveis(imoveisHimobiliaria, "Himobiliária");
+  await guardarImoveis(imoveisHomelusa, "Homelusa");
+  await guardarImoveis(imoveisRealfoz, "Realfoz");
+  await guardarImoveis(imoveisImogabinete, "Imogabinete");
 
   const total =
     imoveisRemax.length +
@@ -70,7 +86,11 @@ async function main() {
     imoveisImojardim.length +
     imoveisEspacos.length +
     imoveisRenthouse.length +
-    imoveisImoexpansao.length;
+    imoveisImoexpansao.length +
+    imoveisHimobiliaria.length +
+    imoveisHomelusa.length +
+    imoveisRealfoz.length +
+    imoveisImogabinete.length;
 
   console.log(`\n=== Concluído: ${total} imóveis guardados no total ===`);
 }

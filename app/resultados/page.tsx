@@ -26,7 +26,7 @@ export default async function ResultadosPage({
   const [remax, zome, cache] = await Promise.all([
     fetchRemax(),
     fetchZome(),
-    fetchFromSupabase(["Imojardim", "Espaços e Casas", "Renthouse", "Imoexpansão"]),
+    fetchFromSupabase(["Imojardim", "Espaços e Casas", "Renthouse", "Imoexpansão", "Himobiliária", "Homelusa", "Realfoz", "Imogabinete"]),
   ]);
   const imoveis = filtrar([...remax, ...zome, ...cache], params);
   const temFiltros = Object.values(params).some(Boolean);

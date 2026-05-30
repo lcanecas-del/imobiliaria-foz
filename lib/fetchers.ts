@@ -305,6 +305,56 @@ export async function fetchImoexpansao(): Promise<Imovel[]> {
   );
 }
 
+// ── Himobiliária ──────────────────────────────────────────────────────────────
+export async function fetchHimobiliaria(): Promise<Imovel[]> {
+  return extrairDeHTML(
+    "https://himobiliaria.com/imoveis",
+    "https://himobiliaria.com",
+    "Himobiliária",
+    "Himobiliária"
+  );
+}
+
+// ── Homelusa ───────────────────────────────────────────────────────────────
+export async function fetchHomelusa(): Promise<Imovel[]> {
+  return extrairDeHTML(
+    "https://www.homelusa.pt/figueiradafoz",
+    "https://www.homelusa.pt",
+    "Homelusa",
+    "Homelusa"
+  );
+}
+
+// ── Realfoz ────────────────────────────────────────────────────────────────
+export async function fetchRealfoz(): Promise<Imovel[]> {
+  return extrairDeHTML(
+    "https://www.realfoz.pt",
+    "https://www.realfoz.pt",
+    "Realfoz",
+    "Realfoz"
+  );
+}
+
+// ── Imogabinete ────────────────────────────────────────────────────────────
+export async function fetchImogabinete(): Promise<Imovel[]> {
+  return extrairDeHTML(
+    "https://www.imogabinete.com/imoveis",
+    "https://www.imogabinete.com",
+    "Imogabinete",
+    "Imogabinete"
+  );
+}
+
+// ── ImoVEEL ────────────────────────────────────────────────────────────────
+export async function fetchImoveel(): Promise<Imovel[]> {
+  return extrairDeHTML(
+    "https://www.imoveel.pt/",
+    "https://www.imoveel.pt",
+    "ImoVEEL",
+    "ImoVEEL"
+  );
+}
+
 // ── Supabase cache (para agências com HTML — lidas da BD na Vercel) ─────────
 export async function fetchFromSupabase(fontes: string[]): Promise<Imovel[]> {
   try {
