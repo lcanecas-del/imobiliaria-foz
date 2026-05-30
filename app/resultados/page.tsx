@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 30;
 
-import { fetchRemax, fetchZome, fetchImojardim, fetchEspacosECasas, fetchRenthouse, fetchImoexpansao, filtrar } from "@/lib/fetchers";
+import { fetchRemax, fetchZome, fetchFromSupabase, filtrar } from "@/lib/fetchers";
 import ImovelCard from "@/components/ImovelCard";
 import Link from "next/link";
 
@@ -23,15 +23,12 @@ export default async function ResultadosPage({
 }) {
   const params = await searchParams;
 
-  const [remax, zome, imojardim, espacosecasas, renthouse, imoexpansao] = await Promise.all([
+  const [remax, zome, cache] = await Promise.all([
     fetchRemax(),
     fetchZome(),
-    fetchImojardim(),
-    fetchEspacosECasas(),
-    fetchRenthouse(),
-    fetchImoexpansao(),
+    fetchFromSupabase(["Imojardim", "Espaços e Casas", "Renthouse", "Imoexpansão"]),
   ]);
-  const imoveis = filtrar([...remax, ...zome, ...imojardim, ...espacosecasas, ...renthouse, ...imoexpansao], params);
+  const imoveis = filtrar([...remax, ...zome, ...cache], params);
   const temFiltros = Object.values(params).some(Boolean);
 
   return (

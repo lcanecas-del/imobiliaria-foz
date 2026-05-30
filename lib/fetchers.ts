@@ -304,6 +304,23 @@ export async function fetchImoexpansao(): Promise<Imovel[]> {
   );
 }
 
+// ── Supabase cache (para agências com HTML — lidas da BD na Vercel) ─────────
+export async function fetchFromSupabase(fontes: string[]): Promise<Imovel[]> {
+  try {
+    const { getSupabase } = await import("./supabase");
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("imoveis")
+      .select("*")
+      .in("fonte", fontes)
+      .order("data_recolha", { ascending: false });
+    if (error) return [];
+    return (data as Imovel[]) || [];
+  } catch {
+    return [];
+  }
+}
+
 export function filtrar(imoveis: Imovel[], params: Record<string, string | undefined>): Imovel[] {
   return imoveis.filter((i) => {
     if (params.tipologia && i.tipologia !== params.tipologia) return false;
