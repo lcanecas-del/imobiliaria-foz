@@ -34,14 +34,14 @@ próxima tarefa.
 
 ## Agências — Fase 2
 - Himobiliária → https://himobiliaria.com/
-- Homelusa → https://www.homelusa.pt/figueiradafoz
+- Homelusa → https://www.homelusa.pt/comprar-casa
 - Renthouse → https://www.renthouse.com.pt/imoveis/venda/
 - Imojardim → https://www.imojardim.pt/
 - Realfoz → https://www.realfoz.pt
 - Imogabinete → https://www.imogabinete.com/imoveis
-- ImoVEEL → https://www.imoveel.pt/
 - Espaços e Casas → https://www.espacosecasas.pt/
 - Imoexpansão → https://imoexpansao.pt/
+- ImoVEEL → bloqueado por Cloudflare (não scraping)
 
 ## Campos a recolher de cada imóvel
 - título, preço, tipologia, área, descrição
@@ -53,4 +53,24 @@ Os scrapers correm localmente (no PC da Liliana) e guardam resultados
 no Supabase. A plataforma web (Vercel) apenas lê da base de dados.
 
 ## Estado atual
-Fase 1 em curso — MVP funcional e publicado na Vercel.
+Projeto completo e publicado em https://imobiliaria-foz-bku9.vercel.app
+
+### Arquitetura de dados
+- **Remax e Zome** — chamadas em tempo real a cada pesquisa (APIs directas, ~2s)
+- **Restantes 8 agências** — lidos do Supabase (cache); actualizar com scraper local
+
+### Scrapers locais (correr no PC da Liliana)
+```
+npx tsx lib/scrapers/run.ts
+```
+Ficheiros principais:
+- `lib/scrapers/run.ts` — orquestra todos os scrapers
+- `lib/scrapers/remax.ts` + `lib/scrapers/zome.ts` — APIs directas (Fase 1)
+- `lib/scrapers/egorealestate.ts` — Playwright para Homelusa, Realfoz, Imogabinete
+- `lib/scrapers/himobiliaria.ts` — Playwright para H-Imobiliária
+- `lib/fetchers.ts` — fetch + Claude Haiku para Imojardim, Espaços e Casas, Renthouse, Imoexpansão
+
+### Vercel
+- Projecto público: `imobiliaria-foz-bku9` (não confundir com `imobiliaria-foz` que tem auth)
+- Deploy: `npx vercel --prod` (a partir deste directório, já ligado ao projecto certo)
+- Variáveis de ambiente necessárias: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, ANTHROPIC_API_KEY
