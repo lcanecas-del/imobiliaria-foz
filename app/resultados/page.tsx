@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 
-import { getSupabase } from "@/lib/supabase";
 import ImovelCard from "@/components/ImovelCard";
 import Link from "next/link";
 import type { Imovel } from "@/lib/supabase";
@@ -15,43 +14,17 @@ interface SearchParams {
   precoMax?: string;
 }
 
-async function getImoveis(params: SearchParams): Promise<Imovel[]> {
-  const supabase = getSupabase();
-  let query = supabase
-    .from("imoveis")
-    .select("*")
-    .order("data_recolha", { ascending: false });
+async function getImoveis(params: SearchParams, baseUrl: string): Promise<Imovel[]> {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => Boolean(v)) as [string, string][]
+  ).toString();
 
-  if (params.tipologia) {
-    query = query.eq("tipologia", params.tipologia);
-  }
-  if (params.precoMin) {
-    query = query.gte("preco", Number(params.precoMin));
-  }
-  if (params.precoMax) {
-    query = query.lte("preco", Number(params.precoMax));
-  }
-  if (params.areaMin) {
-    query = query.gte("area", Number(params.areaMin));
-  }
-  if (params.areaMax) {
-    query = query.lte("area", Number(params.areaMax));
-  }
-  if (params.localizacao) {
-    query = query.ilike("titulo", `%${params.localizacao}%`);
-  }
-  if (params.tipo) {
-    query = query.ilike("titulo", `%${params.tipo}%`);
-  }
+  const res = await fetch(`${baseUrl}/api/imoveis${qs ? "?" + qs : ""}`, {
+    cache: "no-store",
+  });
 
-  const { data, error } = await query.limit(100);
-
-  if (error) {
-    console.error("Erro ao carregar imóveis:", error.message);
-    return [];
-  }
-
-  return (data as Imovel[]) || [];
+  if (!res.ok) return [];
+  return res.json();
 }
 
 export default async function ResultadosPage({
@@ -60,7 +33,13 @@ export default async function ResultadosPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const imoveis = await getImoveis(params);
+
+  const baseUrl =
+    process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000";
+
+  const imoveis = await getImoveis(params, baseUrl);
   const temFiltros = Object.values(params).some(Boolean);
 
   return (
@@ -71,19 +50,16 @@ export default async function ResultadosPage({
             <h1 className="text-xl font-bold text-gray-900">Imóveis Figueira da Foz</h1>
             <p className="text-sm text-gray-500">
               {imoveis.length} imóvel{imoveis.length !== 1 ? "is" : ""} encontrado{imoveis.length !== 1 ? "s" : ""}
+              {" "}· dados em tempo real
             </p>
           </div>
-          <Link
-            href="/"
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-          >
+          <Link href="/" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
             ← Nova pesquisa
           </Link>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Filtros ativos */}
         {temFiltros && (
           <div className="mb-6 flex flex-wrap gap-2">
             {params.tipo && (
@@ -125,8 +101,8 @@ export default async function ResultadosPage({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {imoveis.map((imovel) => (
-              <ImovelCard key={imovel.id} imovel={imovel} />
+            {imoveis.map((imovel, i) => (
+              <ImovelCard key={imovel.link || i} imovel={imovel} />
             ))}
           </div>
         )}
