@@ -10,6 +10,7 @@
     "scrape": "tsx lib/scrapers/run.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.100.1",
     "@supabase/supabase-js": "^2.106.2",
     "next": "16.2.6",
     "playwright": "^1.60.0",
@@ -17,7 +18,6 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "@anthropic-ai/sdk": "^0.100.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

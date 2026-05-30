@@ -163,6 +163,141 @@ export async function fetchZome(): Promise<Imovel[]> {
   }
 }
 
+// Extrai a secção de listagens do HTML cortando header/footer
+function extrairBlocosListagem(html: string): string {
+  // Encontrar a posição do primeiro card de imóvel
+  const marcadores = [
+    'class="card-imovel',
+    'class="property-card',
+    'class="imovel-card',
+    'class="listing-card',
+    'class="resultado',
+  ];
+
+  let inicio = -1;
+  for (const marcador of marcadores) {
+    const pos = html.indexOf(marcador);
+    if (pos !== -1 && (inicio === -1 || pos < inicio)) {
+      inicio = pos;
+    }
+  }
+
+  if (inicio !== -1) {
+    // Tomar até 80K a partir do primeiro card
+    return html.substring(Math.max(0, inicio - 500), inicio + 80000);
+  }
+
+  // Fallback: primeiros 60K
+  return html.substring(0, 60000);
+}
+
+// ── Helper: extrair imóveis de HTML via Claude ──────────────────────────────
+async function extrairDeHTML(url: string, baseUrl: string, fonte: string, contacto: string): Promise<Imovel[]> {
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Accept: "text/html,application/xhtml+xml",
+      },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    const conteudo = extrairBlocosListagem(html);
+
+    const { default: Anthropic } = await import("@anthropic-ai/sdk");
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+    const response = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 4096,
+      messages: [{
+        role: "user",
+        content: `Analisa este HTML de um site imobiliário português (${fonte}) e extrai todos os imóveis à venda listados.
+
+Devolve um array JSON com esta estrutura exata:
+[{"titulo":"...","preco":150000,"tipologia":"T2","area":85,"link":"URL completo","foto":"URL completo da foto"}]
+
+Regras:
+- preco: número sem símbolo (ex: 150000), null se não encontrado
+- tipologia: formato T0/T1/T2/T3/T4+, null se não encontrado
+- area: número em m², null se não encontrado
+- link: se for URL relativa (começa com /), prefixar com "${baseUrl}"
+- foto: URL completo da imagem, null se não encontrado
+- Inclui APENAS imóveis para VENDA (não arrendamento)
+- Devolve APENAS o array JSON, sem mais texto
+
+HTML:
+${conteudo}`,
+      }],
+    });
+
+    const content = response.content[0];
+    if (content.type !== "text") return [];
+    const text = content.text.trim();
+    const start = text.indexOf("[");
+    const end = text.lastIndexOf("]") + 1;
+    if (start === -1) return [];
+
+    const listings = JSON.parse(text.substring(start, end));
+    console.log(`${fonte}: ${listings.length} imóveis encontrados`);
+
+    return listings.map((item: Record<string, unknown>) => ({
+      fonte,
+      titulo: (item.titulo as string) || null,
+      preco: (item.preco as number) || null,
+      tipologia: (item.tipologia as string) || null,
+      area: (item.area as number) || null,
+      descricao: null,
+      contacto,
+      link: (item.link as string) || null,
+      foto: (item.foto as string) || null,
+    }));
+  } catch (err) {
+    console.error(`${fonte}: erro —`, err);
+    return [];
+  }
+}
+
+// ── Imojardim ──────────────────────────────────────────────────────────────
+export async function fetchImojardim(): Promise<Imovel[]> {
+  return extrairDeHTML(
+    "https://www.imojardim.pt/pt/imoveis/?pg=1&ct=00000001&or=30&idioma=pt",
+    "https://www.imojardim.pt",
+    "Imojardim",
+    "Imojardim — +351 233 422 406"
+  );
+}
+
+// ── Espaços e Casas ────────────────────────────────────────────────────────
+export async function fetchEspacosECasas(): Promise<Imovel[]> {
+  return extrairDeHTML(
+    "https://www.espacosecasas.pt/pt/imoveis/?pg=1&ct=00000001&or=30",
+    "https://www.espacosecasas.pt",
+    "Espaços e Casas",
+    "Espaços e Casas — +351 233 422 905"
+  );
+}
+
+// ── Renthouse ──────────────────────────────────────────────────────────────
+export async function fetchRenthouse(): Promise<Imovel[]> {
+  return extrairDeHTML(
+    "https://www.renthouse.com.pt/imoveis/venda/",
+    "https://www.renthouse.com.pt",
+    "Renthouse",
+    "Renthouse — +351 233 097 571"
+  );
+}
+
+// ── Imoexpansão ────────────────────────────────────────────────────────────
+export async function fetchImoexpansao(): Promise<Imovel[]> {
+  return extrairDeHTML(
+    "https://imoexpansao.pt/imoveis",
+    "https://imoexpansao.pt",
+    "Imoexpansão",
+    "Imoexpansão — +351 233 422 892"
+  );
+}
+
 export function filtrar(imoveis: Imovel[], params: Record<string, string | undefined>): Imovel[] {
   return imoveis.filter((i) => {
     if (params.tipologia && i.tipologia !== params.tipologia) return false;

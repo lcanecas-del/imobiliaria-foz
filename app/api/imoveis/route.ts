@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
-import { fetchRemax, fetchZome, filtrar } from "@/lib/fetchers";
+import { fetchRemax, fetchZome, fetchImojardim, fetchEspacosECasas, fetchRenthouse, fetchImoexpansao, filtrar } from "@/lib/fetchers";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const params = Object.fromEntries(searchParams.entries());
 
-  const [remax, zome] = await Promise.all([fetchRemax(), fetchZome()]);
-  const resultado = filtrar([...remax, ...zome], params);
+  const [remax, zome, imojardim, espacosecasas, renthouse, imoexpansao] = await Promise.all([
+    fetchRemax(),
+    fetchZome(),
+    fetchImojardim(),
+    fetchEspacosECasas(),
+    fetchRenthouse(),
+    fetchImoexpansao(),
+  ]);
 
+  const resultado = filtrar([...remax, ...zome, ...imojardim, ...espacosecasas, ...renthouse, ...imoexpansao], params);
   return NextResponse.json(resultado);
 }
