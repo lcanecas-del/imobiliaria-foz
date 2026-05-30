@@ -10,7 +10,19 @@ export async function GET(request: Request) {
   const [remax, zome, cache] = await Promise.all([
     fetchRemax(),
     fetchZome(),
-    fetchFromSupabase(["Imojardim", "Espaços e Casas", "Renthouse", "Imoexpansão"]),
+    fetchFromSupabase([
+      // Figueira da Foz — activas
+      "Imojardim", "Espaços e Casas", "Renthouse", "Imoexpansão",
+      "Himobiliária", "Homelusa", "Realfoz", "Imogabinete",
+      // Figueira da Foz — preparação futura
+      "ERA Figueira da Foz", "Century 21 Aqua", "Predial Serra",
+      "Porta da Frente Figueira", "Figueira Imóveis", "Atlântico Imóveis",
+      "LM Imobiliária", "Mediação Figueira",
+      // Coimbra — preparação futura
+      "ERA Coimbra", "Century 21 Coimbra", "Remax Coimbra", "Predibisa",
+      "Porta da Frente Coimbra", "Imoprime Coimbra", "Mondego Imóveis",
+      "Grão-Pará Imóveis",
+    ]),
   ]);
 
   const resultado = filtrar([...remax, ...zome, ...cache], params);

@@ -18,5 +18,6 @@ export type Imovel = {
   contacto: string | null;
   link: string | null;
   foto: string | null;
+  referencia?: string | null;
   data_recolha?: string;
 };
